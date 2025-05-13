@@ -1,4 +1,4 @@
-# LLD
+# 🛠️ Low-Level Design (LLD) in TypeScript
 
 ### Step 1: Install dependencies
 
