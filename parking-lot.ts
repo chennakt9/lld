@@ -124,7 +124,7 @@ class ParkingLot {
 }
 
 // Driver
-const strategy = new FirstAvailableStrategy();
+const strategy = new FirstAvailableStrategy(); //instead of hardcoding like this, use GetStrategyFactory()...
 const lot = new ParkingLot(5, strategy);
 const car1 = new Vehicle("ABC-123", VehicleType.CAR);
 const bike1 = new Vehicle("DEF-456", VehicleType.BIKE);
