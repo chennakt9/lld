@@ -1,3 +1,5 @@
+export {}
+
 enum Color {
   WHITE = 'white',
   BLACK = 'black'
@@ -20,7 +22,7 @@ class Piece {
   }
 
   isOpponent(target: Piece | null) {
-    return target !== null && target.color === this.color;
+    return target !== null && target !== undefined && target.color === this.color;
   }
 
   moveTo(row: number, col: number) {
@@ -246,18 +248,78 @@ class Game {
     return moved;
   }
 
-  isWin(): boolean {
-    const opponentColor = this.turn === Color.WHITE ? Color.BLACK : Color.WHITE;
+  isInCheck(color: Color): boolean {
+    let kingPosition: [number, number] | null = null;
+
+    // Find the king's position
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const piece = this.board.grid[r][c];
+        if (
+          piece &&
+          piece.color === color &&
+          (piece as Piece)['strategy'] instanceof KingStrategy
+        ) {
+          kingPosition = [r, c];
+          break;
+        }
+      }
+    }
+
+    if (!kingPosition) return false;
+
+    const [kr, kc] = kingPosition;
+
+    // Check if any opposing piece can move to the king's position
     for (let row of this.board.grid) {
-      for (let cell of row) {
-        if (cell && cell.color === opponentColor) {
-          const strategy = (cell as Piece)['strategy'];
-          if (strategy instanceof KingStrategy) {
-            return false;
+      for (let piece of row) {
+        if (piece && piece.color !== color) {
+          const moves = piece.getPossibleMoves(this.board);
+          if (moves.some(([r, c]) => r === kr && c === kc)) {
+            return true;
           }
         }
       }
     }
+
+    return false;
+  }
+
+  isWin(): boolean {
+    const opponentColor = this.turn === Color.WHITE ? Color.BLACK : Color.WHITE;
+
+    if (!this.isInCheck(opponentColor)) return false;
+
+    // If opponent is in check and has no legal moves, it's checkmate
+    for (let row of this.board.grid) {
+      for (let piece of row) {
+        if (piece && piece.color === opponentColor) {
+          const moves = piece.getPossibleMoves(this.board);
+
+          for (const [r, c] of moves) {
+            const originalPos = [piece.row, piece.col];
+            const targetPiece = this.board.grid[r][c];
+
+            // Try the move
+            this.board.grid[piece.row][piece.col] = null;
+            this.board.grid[r][c] = piece;
+            piece.moveTo(r, c);
+
+            const stillInCheck = this.isInCheck(opponentColor);
+
+            // Undo move
+            this.board.grid[r][c] = targetPiece;
+            this.board.grid[originalPos[0]][originalPos[1]] = piece;
+            piece.moveTo(originalPos[0], originalPos[1]);
+
+            if (!stillInCheck) {
+              return false;
+            }
+          }
+        }
+      }
+    }
+
     return true;
   }
 
