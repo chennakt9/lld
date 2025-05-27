@@ -15,3 +15,13 @@ npm install -g ts-node
 ```bash
 ts-node parking-lot.ts
 ```
+
+## Questions completed till now
+
+1. **Design Tic Tac Toe Game**
+2. **Design Chess Game**
+3. **Design Snake & Food Game**
+4. **Design Parking Lot**
+5. **Design Elevator System**
+6. **Design Inventory Management System**
+7. **Design Car Rental System**
