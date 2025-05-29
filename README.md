@@ -26,3 +26,4 @@ ts-node parking-lot.ts
 6. **Design Inventory Management System**
 7. **Design Car Rental System**
 8. **Design Vending Machine**
+9. **Design File System**
