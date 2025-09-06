@@ -92,3 +92,9 @@ class NotificationService {
   await notificationService.sendNotification(not1);
   await notificationService.sendNotification(not2);
 })();
+
+/*
+  design patterns used:
+  - state design pattern
+  - repository design pattern
+*/
