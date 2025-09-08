@@ -283,3 +283,9 @@ atm.selectOperation(TransactionType.CHECK_BALANCE);
 atm.performTransaction(0);
 
 atm.returnCard();
+
+/*
+  Design patterns used:
+  1. State design pattern - ATMState
+  2. Factory design pattern - ATMStateFactory
+*/
