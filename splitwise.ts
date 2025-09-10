@@ -1,3 +1,4 @@
+export {}
 class User {
   constructor(
     public id: string,
@@ -56,24 +57,24 @@ class SplitFactory {
   }
 }
 
-interface ExpenseObserver {
+interface ExpenseSubscriber {
   onExpenseAdded(expense: Expense): void;
 }
 
-interface ExpenseSubject {
-  addObserver(observer: ExpenseObserver): void;
-  removeObserver(observer: ExpenseObserver): void;
+interface ExpensePublisher {
+  addSubscriber(observer: ExpenseSubscriber): void;
+  removeSubscriber(observer: ExpenseSubscriber): void;
   notifyExpenseAdded(expense: Expense): void;
 }
 
-class ExpenseManager implements ExpenseSubject {
-  private observers: ExpenseObserver[] = [];
+class ExpenseManager implements ExpensePublisher {
+  private observers: ExpenseSubscriber[] = [];
 
-  addObserver(observer: ExpenseObserver): void {
+  addSubscriber(observer: ExpenseSubscriber): void {
     this.observers.push(observer);
   }
 
-  removeObserver(observer: ExpenseObserver): void {
+  removeSubscriber(observer: ExpenseSubscriber): void {
     this.observers = this.observers.filter((obs) => obs !== observer);
   }
 
@@ -150,7 +151,7 @@ class SubOptimalSettlementStrategy implements SettlementStrategy {
   }
 }
 
-class BalanceSheet implements ExpenseObserver {
+class BalanceSheet implements ExpenseSubscriber {
   private allExpenses: Expense[] = [];
 
   onExpenseAdded(expense: Expense): void {
@@ -211,7 +212,7 @@ const expense2 = new Expense("exp2", "Movie", 300, charlie, shares2);
 // Set up Expense Manager and Balance Sheet
 const manager = new ExpenseManager();
 const sheet = new BalanceSheet();
-manager.addObserver(sheet);
+manager.addSubscriber(sheet);
 
 // Add Expenses
 manager.notifyExpenseAdded(expense1);
@@ -230,3 +231,9 @@ console.log("Transactions:");
 for (let txn of txns) {
   console.log(`${txn.from.name} pays ${txn.to.name}: ₹${txn.amount.toFixed(2)}`);
 }
+
+/*
+  Design patterns used:
+  1. Factory pattern
+  2. Observer pattern
+*/
