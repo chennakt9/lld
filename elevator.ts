@@ -69,10 +69,12 @@ class Elevator {
       this.direction = Direction.Up;
     } else if (this.currentFloor > max) {
       this.direction = Direction.Down;
-    } else if (this.currentFloor < max) {
+    } else if (this.direction = Direction.Up) {
       this.direction = Direction.Up;
-    } else {
+    } else if (this.direction = Direction.Down) {
       this.direction = Direction.Down;
+    } else {
+      this.direction = Direction.Up;
     }
 
     return this.direction;
