@@ -28,7 +28,8 @@ class Food {
         x: Math.floor(Math.random() * this.gridWidth),
         y: Math.floor(Math.random() * this.gridHeight),
       };
-    } while (this.snake.selfCrash(pos));
+      // ensure food doesn't spawn on the snake
+    } while (this.snake.selfCrash(pos)); // default checks entire body
     return pos;
   }
 
@@ -38,15 +39,15 @@ class Food {
 }
 
 class Snake {
-  body: Point[] = [{x: 5, y: 5}];
+  body: Point[] = [{ x: 5, y: 5 }];
 
   constructor(private rows: number, private cols: number) {}
 
-  move(direction: Direction) {
+  // Public helper to compute the next head position without mutating state
+  getNextHead(direction: Direction): Point {
     const head = this.body[0];
     const newHead = { ...head };
-
-    switch(direction) {
+    switch (direction) {
       case Direction.UP:
         newHead.x--;
         break;
@@ -60,13 +61,27 @@ class Snake {
         newHead.y++;
         break;
     }
+    return newHead;
+  }
 
-    if (this.crossBoundaries(newHead) || this.selfCrash(newHead)) {
+  // move - optionally grow (when grow === true we DON'T pop the tail)
+  move(direction: Direction, grow: boolean = false) {
+    const newHead = this.getNextHead(direction);
+
+    if (this.crossBoundaries(newHead)) {
+      return false;
+    }
+
+    // If we're NOT growing, moving into the current tail position is allowed
+    const ignoreTailWhenChecking = !grow;
+    if (this.selfCrash(newHead, ignoreTailWhenChecking)) {
       return false;
     }
 
     this.body.unshift(newHead);
-    this.body.pop();
+    if (!grow) {
+      this.body.pop();
+    }
     return true;
   }
 
@@ -74,13 +89,14 @@ class Snake {
     return newHead.x < 0 || newHead.x >= this.rows || newHead.y < 0 || newHead.y >= this.cols;
   }
 
-  selfCrash(newHead: Point) {
-    return this.body.some(segment => segment.x === newHead.x && segment.y === newHead.y);
-  }
-
-  grow() {
-    const tail = this.body[this.body.length - 1];
-    this.body.push({ ...tail }); // grow by duplicating tail
+  // selfCrash optionally ignores the tail (useful when the tail will move away)
+  selfCrash(newHead: Point, ignoreTail: boolean = false) {
+    const limit = this.body.length - (ignoreTail ? 1 : 0);
+    for (let i = 0; i < limit; i++) {
+      const segment = this.body[i];
+      if (segment.x === newHead.x && segment.y === newHead.y) return true;
+    }
+    return false;
   }
 }
 
@@ -103,16 +119,18 @@ class Game {
   }
 
   gameLoop() {
-    const success = this.snake.move(this.direction);
+    // compute next head first so we can tell move() whether to grow
+    const nextHead = this.snake.getNextHead(this.direction);
+    const willGrow = nextHead.x === this.food.position.x && nextHead.y === this.food.position.y;
+
+    const success = this.snake.move(this.direction, willGrow);
 
     if (!success) {
       this.endGame();
       return;
     }
 
-    const head = this.snake.body[0];
-    if (head.x === this.food.position.x && head.y === this.food.position.y) {
-      this.snake.grow();
+    if (willGrow) {
       this.food.respawn();
     }
 
