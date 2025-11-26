@@ -17,17 +17,17 @@ class LogMessage {
   }
 }
 
-interface LogAppender {
+interface LogAppenderStrategy {
     append(logMessage: LogMessage): void;
 }
 
-class ConsoleAppender implements LogAppender {
+class ConsoleAppender implements LogAppenderStrategy {
   append(logMessage: LogMessage): void {
     console.log(logMessage.toString());
   }
 }
 
-class FileAppender implements LogAppender {
+class FileAppender implements LogAppenderStrategy {
   private file: LogMessage[] = [];
   append(logMessage: LogMessage): void {
     this.file.push(logMessage);
@@ -39,7 +39,7 @@ abstract class LogHandler {
 
   constructor(
     protected level: LogLevelEnum,
-    protected appender: LogAppender
+    protected appender: LogAppenderStrategy
   ) {}
 
   setNextLogger(logger: LogHandler) {
@@ -62,7 +62,7 @@ class DebugLogger extends LogHandler {}
 
 class ErrorLogger extends LogHandler {}
 
-function getChainOfLoggers(appender: LogAppender): LogHandler {
+function getChainOfLoggers(appender: LogAppenderStrategy): LogHandler {
   const errorLogger = new ErrorLogger(LogLevelEnum.ERROR, appender);
   const infoLogger = new InfoLogger(LogLevelEnum.INFO, appender);
   const debugLogger = new DebugLogger(LogLevelEnum.DEBUG, appender);
